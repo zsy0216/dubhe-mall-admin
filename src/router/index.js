@@ -56,6 +56,80 @@ export const constantRoutes = [
   },
 
   {
+    path: '/product',
+    component: Layout,
+    redirect: '/product/list',
+    name: '商品管理',
+    meta: { title: '商品管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'list',
+        name: '商品列表',
+        component: () => import('@/views/table/index'),
+        meta: { title: '商品列表', icon: 'table' }
+      },
+      {
+        path: 'add',
+        name: '添加商品',
+        component: () => import('@/views/tree/index'),
+        meta: { title: '添加商品', icon: 'tree' }
+      },
+      {
+        path: 'cate',
+        name: '商品分类',
+        component: () => import('@/views/tree/index'),
+        meta: { title: '商品分类', icon: 'tree' }
+      },
+      {
+        path: 'type',
+        name: '商品类型',
+        component: () => import('@/views/tree/index'),
+        meta: { title: '商品类型', icon: 'tree' }
+      },
+      {
+        path: 'branch',
+        name: '品牌管理',
+        component: () => import('@/views/tree/index'),
+        meta: { title: '品牌管理', icon: 'tree' }
+      }
+    ]
+  },
+
+  {
+    path: '/order',
+    component: Layout,
+    redirect: '/order/list',
+    name: '订单管理',
+    meta: { title: '订单管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'list',
+        name: '订单列表',
+        component: () => import('@/views/table/index'),
+        meta: { title: '订单列表', icon: 'table' }
+      },
+      {
+        path: 'add',
+        name: '订单设置',
+        component: () => import('@/views/tree/index'),
+        meta: { title: '订单设置', icon: 'tree' }
+      },
+      {
+        path: 'cate',
+        name: '退货申请处理',
+        component: () => import('@/views/tree/index'),
+        meta: { title: '退货申请处理', icon: 'tree' }
+      },
+      {
+        path: 'type',
+        name: '退货原因设置',
+        component: () => import('@/views/tree/index'),
+        meta: { title: '退货原因设置', icon: 'tree' }
+      }
+    ]
+  },
+  /*
+  {
     path: '/example',
     component: Layout,
     redirect: '/example/table',
@@ -75,9 +149,9 @@ export const constantRoutes = [
         meta: { title: 'Tree', icon: 'tree' }
       }
     ]
-  },
+  },*/
 
-  {
+  /*  {
     path: '/form',
     component: Layout,
     children: [
@@ -88,9 +162,9 @@ export const constantRoutes = [
         meta: { title: 'Form', icon: 'form' }
       }
     ]
-  },
+  },*/
 
-  {
+  /* {
     path: '/nested',
     component: Layout,
     redirect: '/nested/menu1',
@@ -147,18 +221,7 @@ export const constantRoutes = [
         meta: { title: 'menu2' }
       }
     ]
-  },
-
-  {
-    path: 'external-link',
-    component: Layout,
-    children: [
-      {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
-      }
-    ]
-  },
+  },*/
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
