@@ -1,62 +1,135 @@
 <template>
-  <div>
-    <!-- 卡片视图 -->
-    <el-card>
-      <!-- 搜索 添加 -->
-      <el-row :gutter="20">
-        <el-col :span="6">
-          <el-input v-model="queryInfo.query" placeholder="请输入内容" clearable @clear="getDataList">
-            <el-button slot="append" icon="el-icon-search" @click="getDataList" />
-          </el-input>
-        </el-col>
-        <el-col :span="4">
-          <el-button type="primary" @click="dialogVisible = true, type = 'add'">添加用户</el-button>
-        </el-col>
-      </el-row>
-      <!-- 用户列表区域 -->
-      <el-table :data="datalist" border stripe>
-        <!-- stripe: 斑马条纹
-        border：边框-->
-        <el-table-column type="index" label="#" />
-        <el-table-column v-for="column in columns" :key="column.key" :prop="column.key" :label="column.title" />
-        <el-table-column label="操作">
+  <div class="app-container">
+    <el-card class="filter-container" shadow="never">
+      <div>
+        <i class="el-icon-search" />
+        <span>筛选搜索</span>
+        <el-button
+          style="float: right"
+          type="primary"
+          size="small"
+          @click="getDataList()"
+        >
+          查询结果
+        </el-button>
+        <el-button
+          style="float: right;margin-right: 15px"
+          size="small"
+          @click="handleResetSearch()"
+        >
+          重置
+        </el-button>
+      </div>
+      <div style="margin-top: 15px">
+        <el-form :inline="true" :model="queryInfo" size="small" label-width="140px">
+          <el-form-item v-for="searchItem in searchList" :key="searchItem.key" :label="searchItem.label">
+            <el-input v-if="searchItem.type==='input'" v-model="queryInfo.query[searchItem.key]" style="width: 185px" :placeholder="searchItem.placeholder" />
+            <el-cascader
+              v-if="searchItem.type==='cascader'"
+              v-model="queryInfo.query[searchItem.key]"
+              clearable
+              :options="searchItem.options"
+            />
+            <el-select v-if="searchItem.type==='select'" v-model="queryInfo.query[searchItem.key]" :placeholder="searchItem.placeholder" clearable>
+              <el-option
+                v-for="item in searchItem.options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-card>
+    <el-card class="operate-container" shadow="never">
+      <i class="el-icon-tickets" />
+      <span>数据列表</span>
+      <el-button
+        class="btn-add"
+        size="mini"
+        @click="dialogVisible = true, type = 'add'"
+      >
+        添加
+      </el-button>
+    </el-card>
+    <div class="table-container">
+      <el-table
+        ref="tableList"
+        v-loading="listLoading"
+        :data="datalist"
+        style="width: 100%"
+        border
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="60" align="center" />
+        <el-table-column v-for="column in columns" :key="column.key" :prop="column.key" :label="column.label" align="center">
+          <template v-if="column.type==='texts'" slot-scope="scope">
+            <p v-for="text in column.texts" :key="text.key">{{ text.pretext }}{{ scope.row[text.key] }}</p>
+          </template>
+          <template v-if="column.type==='img'" slot-scope="scope">
+            <img style="height: 80px" :src="scope.row[column.key]">
+          </template>
+          <template v-if="column.type==='switch'" slot-scope="scope">
+            <p v-for="switchItem in column.switches" :key="switchItem.key">{{ switchItem.pretext }}
+              <el-switch
+                v-model="scope.row[switchItem.key]"
+                :active-value="1"
+                :inactive-value="0"
+                @change="handleStatusChange(switchItem, scope.row)"
+              />
+            </p>
+          </template>
+          <template v-if="column.type==='button-primary'" slot-scope="scope">
+            <el-button type="primary" :icon="column.icon" circle @click="showDialog(scope.row.id, 'edit')" />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="160" align="center">
           <template slot-scope="scope">
-            <el-button
-              type="primary"
-              icon="el-icon-edit"
-              size="mini"
-              circle
-              @click="showEditDialog(scope.row.id)"
-            />
-            <el-button
-              type="danger"
-              icon="el-icon-delete"
-              size="mini"
-              circle
-              @click="removeDataById(scope.row.id)"
-            />
+            <p>
+              <el-button
+                size="mini"
+                @click="showDialog(scope.row.id, 'show')"
+              >查看
+              </el-button>
+              <el-button
+                size="mini"
+                @click="showDialog(scope.row.id, 'edit')"
+              >编辑
+              </el-button>
+            </p>
+            <p>
+              <el-button
+                size="mini"
+                type="danger"
+                @click="removeDataById(scope.row.id)"
+              >删除
+              </el-button>
+            </p>
           </template>
         </el-table-column>
       </el-table>
-      <!-- 分页区域 -->
+    </div>
+    <div class="pagination-container">
       <el-pagination
-        :current-page="queryInfo.pagenum"
-        :page-sizes="[2, 5, 10, 15]"
-        :page-size="queryInfo.pagesize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="totle"
+        background
+        layout="total, sizes,prev, pager, next,jumper"
+        :page-size="queryInfo.pageSize"
+        :page-sizes="[5,10,15]"
+        :current-page.sync="queryInfo.pageNum"
+        :total="total"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
-    </el-card>
-
-    <!-- 添加用户的对话框 -->
+    </div>
+    <!-- 对话框 -->
     <el-dialog title="表单" :visible.sync="dialogVisible" width="50%" @close="dialogClosed">
       <!-- 内容主体 -->
       <el-form
         ref="formRef"
         :model="formData"
         :rules="formRules"
+        :disabled="type === 'show'"
         label-width="100px"
       >
         <el-form-item v-for="form in forms" :key="form.key" :prop="form.key" :label="form.title">
@@ -82,6 +155,7 @@ export default {
       type: Object,
       required: true
     },
+    searchList: [],
     forms: {
       type: Object,
       required: true
@@ -97,14 +171,15 @@ export default {
       type: '',
       // 获取用户列表查询参数对象
       queryInfo: {
-        query: '',
+        query: {},
         // 当前页数
-        pagenum: 1,
+        pageNum: 1,
         // 每页显示多少数据
-        pagesize: 5
+        pageSize: 5
       },
       datalist: [],
-      totle: 0,
+      listLoading: false,
+      total: 0,
       // 添加用户对话框
       dialogVisible: false,
       // 用户添加
@@ -139,9 +214,12 @@ export default {
         params
       }).then(response => {
         this.datalist = response.data.items
-        // this.totle = res.data.totle
+        // this.total = res.data.total
         this.listLoading = false
       })
+    },
+    handleResetSearch() {
+      this.queryInfo['query'] = {}
     },
     submitForm() {
       console.log('Type', this.type)
@@ -174,8 +252,8 @@ export default {
       })
     },
     // 编辑用户信息
-    showEditDialog(id) {
-      const params = this.formData
+    showDialog(id, str) {
+      const params = id
       request({
         url: this.apis.detail.url,
         method: this.apis.detail.method,
@@ -184,9 +262,9 @@ export default {
         // if (res.meta.status !== 200) {
         //   return this.$message.error('查询用户信息失败！')
         // }
+        this.type = str
         this.formData = response.data
         this.dialogVisible = true
-        this.type = 'edit'
       })
     },
     // 修改用户信息
@@ -205,9 +283,10 @@ export default {
           // if (res.meta.status !== 200) {
           //   this.$message.error('更新用户信息失败！')
           // }
-          // // 隐藏添加用户对话框
-          // this.dialogVisible = false
           this.$message.success('更新用户信息成功！')
+          // 隐藏添加用户对话框
+          this.dialogVisible = false
+          this.formData = []
           this.getDataList()
         })
       })
@@ -239,21 +318,40 @@ export default {
         this.getDataList()
       })
     },
+    handleStatusChange(switchItem, row) {
+      const params = new URLSearchParams()
+      params.append(switchItem.key, switchItem.key)
+      params.append('changeItem', row)
+      request({
+        url: switchItem.url,
+        method: switchItem.method,
+        params
+      }).then(response => {
+        this.$message({
+          message: '修改成功',
+          type: 'success',
+          duration: 1000
+        })
+      })
+    },
     // 监听 pagesize改变的事件
     handleSizeChange(newSize) {
       // console.log(newSize)
-      this.queryInfo.pagesize = newSize
+      this.queryInfo.pageSize = newSize
       this.getDataList()
     },
     // 监听 页码值 改变事件
     handleCurrentChange(newSize) {
       // console.log(newSize)
-      this.queryInfo.pagenum = newSize
+      this.queryInfo.pageNum = newSize
       this.getDataList()
     },
     // 监听 添加用户对话框的关闭事件
     dialogClosed() {
       this.$refs.formRef.resetFields()
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val
     }
   }
 }
