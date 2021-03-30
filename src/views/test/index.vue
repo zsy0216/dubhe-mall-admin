@@ -5,6 +5,7 @@
       :form-rules="formRules"
       :forms="forms"
       :apis="apis"
+      :search-list="searchList"
       @getList="fetchData"
     />
 
@@ -60,10 +61,149 @@ export default {
           url: '/vue-admin-template/table/list'
         }
       },
+      searchList: [
+        {
+          key: 'keyword',
+          label: '输入搜索: ',
+          type: 'input',
+          placeholder: '商品名称'
+        },
+        {
+          key: 'productSn',
+          label: '商品货号: ',
+          type: 'input',
+          placeholder: '商品名称'
+        },
+        {
+          key: 'ProductCate',
+          label: '商品分类: ',
+          type: 'cascader',
+          model: this.selectProductCateValue,
+          options: this.productCateOptions,
+          placeholder: '商品名称'
+        },
+        {
+          key: 'brandId',
+          label: '商品品牌: ',
+          type: 'select',
+          options: this.brandOptions,
+          placeholder: '请选择品牌'
+        },
+        {
+          key: 'publishStatus',
+          label: '上架状态: ',
+          type: 'select',
+          options: this.publishStatusOptions,
+          placeholder: '全部'
+        },
+        {
+          key: 'verifyStatus',
+          label: '审核状态: ',
+          type: 'select',
+          options: this.verifyStatusOptions,
+          placeholder: '全部'
+        }
+      ],
       columns: [
-        { key: 'title', title: 'title' },
-        { key: 'author', title: '作者' },
-        { key: 'pageviews', title: 'pageviews' }
+        {
+          key: 'id',
+          label: '编号',
+          type: 'texts',
+          texts: [
+            {
+              key: 'id',
+              pretext: '编号'
+            }
+          ]
+        },
+        {
+          key: 'pic',
+          label: '商品图片',
+          type: 'img'
+        },
+        {
+          key: 'name',
+          label: '商品名称',
+          type: 'texts',
+          texts: [
+            {
+              key: 'name',
+              pretext: ''
+            },
+            {
+              key: 'brandName',
+              pretext: '品牌：'
+            }
+          ]
+        },
+        {
+          key: 'price',
+          label: '价格/货号',
+          type: 'texts',
+          texts: [
+            {
+              key: 'price',
+              pretext: '价格：￥'
+            },
+            {
+              key: 'productSn',
+              pretext: '货号：'
+            }
+          ]
+        },
+        {
+          key: 'lab',
+          label: '标签',
+          type: 'switch',
+          switches: [
+            {
+              pretext: '上架：',
+              key: 'publishStatus',
+              method: 'post',
+              url: '/vue-admin-template/table/list'
+            },
+            {
+              pretext: '新品：',
+              key: 'newStatus',
+              method: 'post',
+              url: '/vue-admin-template/table/list'
+            },
+            {
+              pretext: '推荐：',
+              key: 'recommandStatus',
+              method: 'post',
+              url: '/vue-admin-template/table/list'
+            }
+          ]
+        },
+        {
+          key: 'sort',
+          label: '排序',
+          type: 'texts',
+          texts: [
+            {
+              key: 'sort',
+              pretext: ''
+            }
+          ]
+        },
+        {
+          key: 'SKUButton',
+          label: 'SKU库存',
+          type: 'button-primary',
+          icon: 'el-icon-edit'
+        },
+        {
+          key: 'sale',
+          label: '销量',
+          type: 'texts',
+          texts: [
+            {
+              key: 'sale',
+              pretext: ''
+            }
+          ]
+        }
       ],
       forms: [
         {
